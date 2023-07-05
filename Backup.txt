@@ -1,0 +1,171 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class Jogo {
+
+    //variáveis tabuleiro
+    private int linhas = 0;
+    private int colunas = 0;
+    private int minLinhas = 3;
+    private int minColunas = 3;
+    private int jogadas = 0;
+    private String tab[][];
+
+    //variáveis visuais
+    String posicaoVazia = "[  ]";
+    String navioEmoji = "[" + "\uD83D\uDEA2" + "]";
+    String aguaEmoji = "[" + "\uD83D\uDCA7" + "]";
+
+    //variáveis navios
+    int quantNavios = 5;
+    int naviosDestruidos = 0;
+
+    //posicoes navios
+    int navioLinha[] = new int[quantNavios];
+    int navioColuna[] = new int[quantNavios];
+
+    public String[][] tabuleiro() {
+        // Pergunta o tamanho do tabuleiro enquanto não respeitar a condição de tamanho
+        do {
+            linhas = Entrada.leiaInt("Digite o número de linhas para o tabuleiro");
+        } while (linhas < minLinhas);
+        do {
+            colunas = Entrada.leiaInt("Digite o número de colunas para o tabuleiro");
+        } while (colunas < minColunas);
+
+        tab = new String[linhas][colunas];
+
+        //cria uma lista de possíveis posições no tabuleiro -> percorre todas linhas e colunas
+        List<int[]> posicoes = new ArrayList<>();
+        for (int i = 0; i < linhas; i++) {
+            for (int j = 0; j < colunas; j++) {
+                posicoes.add(new int[]{i, j});
+            }
+        }
+
+        //embaralha as posições -> navios aleatórios
+        Collections.shuffle(posicoes);
+
+        //cada linha é salva em uma array, para serem comparadas depois
+        for (int i = 0; i < quantNavios; i++) {
+            int[] posicao = posicoes.get(i);
+            int linha = posicao[0];
+            int coluna = posicao[1];
+            tab[linha][coluna] = posicaoVazia;
+            navioLinha[i] = linha;
+            navioColuna[i] = coluna;
+        }
+
+        //preenche o tabuleiro com a variável posicaoVazia
+        for (int contL = 0; contL < linhas; contL++) {
+            for (int contC = 0; contC < colunas; contC++) {
+                if (tab[contL][contC] == null) {
+                    tab[contL][contC] = posicaoVazia;
+                }
+            }
+        }
+        return tab;
+    }
+
+    public void atirar(){
+
+        //variaveis das tentativas do usuário
+        int atirarLinha;
+        int atirarColuna;
+
+        while(naviosDestruidos<quantNavios){
+            //faz a pergunta de qual linha atirar até que todos navio sejam destruídos
+            do {
+                atirarLinha = Entrada.leiaInt("Digite a posição da linha para atirar");
+
+                if(atirarLinha > linhas-1){
+                    System.out.println("Digite uma posição válida!");
+                }
+            }while (atirarLinha > linhas-1);
+
+            do {
+                atirarColuna = Entrada.leiaInt("Digite a posição da coluna para atirar");
+
+                if(atirarColuna > colunas-1){
+                    System.out.println("Digite uma posição válida!");
+                }
+                else{
+                    jogadas++;
+                }
+            }while (atirarColuna > colunas-1);
+
+            //se acertar um local que não tem navio, o emoji "água" aparece
+            for(int i = 0; i<quantNavios; i++){
+                if(atirarLinha != navioLinha[i] || atirarColuna != navioColuna[i]){
+                    tab[atirarLinha][atirarColuna] = aguaEmoji;
+                }
+            }
+
+            //se acertar um navio, o emoji "navio" aparece
+            for(int i = 0; i<quantNavios; i++){
+                if(atirarLinha == navioLinha[i] && atirarColuna == navioColuna[i]){
+                    tab[atirarLinha][atirarColuna] = navioEmoji;
+                    naviosDestruidos++;
+                }
+            }
+            linha();
+            mostraTabuleiro();
+            mostraJogadas();
+            motraNavioDestruidos();
+            linha();
+        }
+
+        if (naviosDestruidos == quantNavios){
+            BoasVindas.fimGanhou();
+        }
+    }
+
+    public void fazTabuleiro() {
+        //o método tabuleiro é usado dentro desse
+        String tab[][] = tabuleiro();
+
+        //mostra o tabuleiro na tela pela 1a vez
+        for (int contL = 0; contL < linhas; contL++) {
+            for (int contC = 0; contC < colunas; contC++) {
+                System.out.print(tab[contL][contC]);
+            }
+            System.out.println();
+        }
+    }
+
+    public void mostraTabuleiro(){
+        //método para mostrar o tabuleiro após cada jogada
+        for (int contL = 0; contL < linhas; contL++) {
+            for (int contC = 0; contC < colunas; contC++) {
+                System.out.print(tab[contL][contC]);
+            }
+            System.out.println();
+        }
+    }
+
+    public void mostraJogadas(){
+        //informa o número total de jogadas
+        System.out.println("Quantidade de jogadas: " + jogadas);
+    }
+
+    public void motraNavioDestruidos(){
+        //informa o número total de navio destruídos
+        System.out.println("Quantidade de navios destruídos: " + naviosDestruidos);
+    }
+
+
+    public void teste(){
+        //teste para mostrar a posição dos navios
+        for (int i = 0; i<quantNavios; i++){
+            System.out.println(navioLinha[i] + "/" + navioColuna[i]);
+        }
+    }
+
+    public void linha(){
+        //método para pular um linha e dividir melhor o que se é mostrado ao usuário
+        System.out.println();
+    }
+}
+
+
